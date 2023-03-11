@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>AI Research Assistant</title>
+<style>
+
+body {
+	background-color: #f5eae1;
+}
+
+.container {
+	position: absolute;
+	left: 25%;
+	width: 50%;
+	height: 90%
+	top: 10%
+	padding: 20px;
+}
+
+.reply {
+  font-family: "Libre Baskerville", serif;
+}
+
+h3 {
+  font-family: "Libre Baskerville", serif;
+}
+
+</style>
+
+<body>
+
+<div class="container">
+<center><h2>Demo: Your Personal Research AI.</h2></center>
+<p>
+<form id="my-form-1" method="post" data-target="response">
+  <div style="display: flex; flex-direction: row;">
+  <textarea id="input-box" name="content1" placeholder="" rows="3" cols="20" style="flex: 1; width: 40%; font-size: 20pt;"></textarea>
+  </div>
+</form>
+<p>
+<h3><div id="response"></div></h3>
+<div id="previous-response"></div>
+</div>
+
+<script>
+  $(document).ready(function() {
+    $('#input-box').keydown(function(event) {
+      if (event.keyCode === 13) { // 13 is the code for "Enter" key
+        event.preventDefault();
+        var formData = $('#my-form-1').serialize();
+        var target = $('#my-form-1').data('target');
+	var query = $('#input-box').val();
+        console.log("FormData: ", formData); // log the FormData sent to Ajax
+        $.ajax({
+          type: 'POST',
+          url: '/',
+          data: formData,
+          success: function(response) {
+            var previousResponse = $('#response').html() + '<p>' + $('#previous-response').html(); 
+            $('#previous-response').html(previousResponse);
+            var fullresponse = '<i>' + query + '</i><br>' + " " + response.reply;
+  	    $('#response').html(fullresponse);
+          },
+          error: function() {
+            $('#' + target).text('An error occurred while processing your request.');
+          }
+        });
+        $('#my-form-1')[0].reset(); // reset the form
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
