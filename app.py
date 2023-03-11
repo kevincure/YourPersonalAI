@@ -1,4 +1,4 @@
-# You need to run Embeddings before using this codemost_similar = '\n'.join(row[1] for row in most_similar_df.values)
+# You need to run Embeddings before using this code
 
 # You probably don't need all these; I just used them all at some point trying things out
 import csv
@@ -55,7 +55,7 @@ def index():
         most_similar = "The best guess at a related paper is " + first_row_first_elem + "\n\n" + '\n\n'.join(row[1] for row in most_similar_df.values)
 
         # I use temperature=0 to give most "factual" answer
-        instructions = "Pretend you are a expert graduate student researcher.  You have been asked to answer a series of conceptual questions about some academic papers.  Answer truthfully. Just give the answer in a couple sentences, without language like 'the text above shows' or 'the passage shows' or 'in the text' - I just want the pure response. Say 'I don't know' if you can't find the answer in the text below."
+        instructions = "Pretend you are a expert graduate student researcher.  You have been asked to answer a series of conceptual questions about some academic papers.  Answer truthfully. Just give the answer in a couple sentences, without language like 'the text above shows' or 'the passage shows' or 'in the text' - I just want the pure response.  Always tell me explicitly which paper you believe you are drawing on. Say 'I don't know' if you can't find the answer to the original question in the text below."
         reply = []
         send_to_gpt = []
         send_to_gpt.append({"role":"system","content":instructions})
