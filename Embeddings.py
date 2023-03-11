@@ -1,7 +1,7 @@
 # This code takes all pdfs in documents, scans them, then generates paragraph embeddings on a sliding scale
-# To add: allow text and latex as well (though this is trivial)
 # Run this before you run app.py
 # You need an OpenAI key saved in APIkey.txt
+# It is useful to change the file names to a longer title that summarizes briefly what the document is about
 
 import os
 from PyPDF2 import PdfReader 
@@ -24,11 +24,14 @@ with open("APIkey.txt") as f:
 # Create an empty DataFrame to store the text and title of each document
 df = pd.DataFrame(columns=["Title", "Text"])
 
-# Loop through all files in the "documents" folder
+# Create an empty DataFrame to store the text and title of each document
+df = pd.DataFrame(columns=["Title", "Text"])
+
+# Loop through all pdf, txt, tex in the "documents" folder
 for filename in os.listdir("Documents"):
     if filename.endswith(".pdf"):
         # Open the PDF file in read-binary mode
-        filepath = os.path.join("documents", filename)
+        filepath = os.path.join("Documents", filename)
         reader = PdfReader(filepath)
         
         # Extract the text from each page of the PDF
@@ -36,7 +39,36 @@ for filename in os.listdir("Documents"):
         for page in reader.pages:
             text += page.extract_text() + "\n"
         
-        # Add the text of PDF and its title to the DataFrame
+        # Add the text and title to the DataFrame
+        title = os.path.splitext(filename)[0] # Remove the file extension from the filename
+        df = df.append({"Title": title, "Text": text}, ignore_index=True)
+
+    elif filename.endswith(".txt"):
+        # Open the text file and read its contents
+        filepath = os.path.join("Documents", filename)
+        with open(filepath, "r") as file:
+            text = file.read()
+        
+        # Add the text and title to the DataFrame
+        title = os.path.splitext(filename)[0] # Remove the file extension from the filename
+        df = df.append({"Title": title, "Text": text}, ignore_index=True)
+        
+    elif filename.endswith(".tex"):
+        # Use regular expressions to extract regular text from the LaTeX file
+        filepath = os.path.join("Documents", filename)
+        with open(filepath, "r") as file:
+            lines = file.readlines()
+        # Find the line number of the \begin{document} command
+        doc_start = None
+        for i, line in enumerate(lines):
+            if "\\begin{document}" in line:
+                doc_start = i
+                break
+        # Ignore all lines before the \begin{document} command
+        lines = lines[doc_start:]
+        text = "".join(lines)
+        
+        # Add the text and title to the DataFrame
         title = os.path.splitext(filename)[0] # Remove the file extension from the filename
         df = df.append({"Title": title, "Text": text}, ignore_index=True)
 
@@ -54,9 +86,12 @@ for i, row in df.iterrows():
 
         # Create the current chunk by joining the tokens within the start and end indices
         chunk = ' '.join(tokens[start:end])
-
+        
+        # Add the article title to the beginning of the chunk
+        chunk_with_title = "This text comes from the article titled " + row['Title'] + ". " + chunk
+        
         # Append the current chunk to the list of chunks, along with the corresponding title
-        chunks.append([row['Title'], chunk])
+        chunks.append([row['Title'], chunk_with_title])
 
 # Convert the list of chunks to a dataframe and write to a CSV
 df_chunks = pd.DataFrame(chunks, columns=['Title', 'Text'])
